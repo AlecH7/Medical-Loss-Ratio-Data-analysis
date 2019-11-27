@@ -1,0 +1,564 @@
+---
+title: "MLR V2"
+author: "Alec Henriksen"
+date: "July 22, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rmarkdown)
+library(knitr)
+library(readxl)
+library(Stat2Data)
+library(tidyverse)
+library(data.table)
+```
+
+## R Markdown
+
+```{r}
+premium2018 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2018 MLR Part 1-2.csv")
+premium2017 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2017 MLR Part 1-2.csv")
+premium2016 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2016 MLR Part 1-2.csv")
+premium2015 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2015 MLR Part 1-2.csv")
+premium2014 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2014 MLR Part 1-2.csv")
+premium2013 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2013 MLR Part 1-2.csv")
+premium2012 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2012 MLR Part 1-2.csv")
+premium2011 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2011 MLR Part 1-2.csv")
+```
+
+```{r}
+mlr2011 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2011_Part3_MLR_Rebate_Calculation.csv")
+mlr2012 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2012_Part3_MLR_Rebate_Calculation.csv")
+mlr2013 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2013_Part3_MLR_Rebate_Calculation.csv")
+mlr2014 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2014_Part3_MLR_Rebate_Calculation.csv")
+mlr2015 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2015_Part3_MLR_Rebate_Calculation.csv")
+mlr2016 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2016_Part3_MLR_Rebate_Calculation.csv")
+mlr2017 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2017_Part3_MLR_Rebate_Calculation.csv")
+mlr2018 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2018_Part3_MLR_Rebate_Calculation.csv")
+
+
+
+```
+
+
+
+Individual market 2017
+```{r}
+#Removing extra MLR columns
+filteredMLR2017 <- select(mlr2017, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_CY)
+#Spreading MLR data
+mlr2017.spread1 <- spread(filteredMLR2017, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_CY)
+#Removing extra premium columns
+filteredPremium2017 <- select(premium2017, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Spreading premium data
+premium2017.spread1 <- spread(filteredPremium2017, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Removing extra columns
+second.filter2017 <- select(premium2017.spread1, MR_SUBMISSION_TEMPLATE_ID, TOTAL_DIRECT_PREMIUM_EARNED)
+#Combining premium and MLR results
+joint.data2017 <- left_join(mlr2017.spread1, second.filter2017, by = "MR_SUBMISSION_TEMPLATE_ID", copy = F)
+#Cleaned 
+removed.extra.columns.joint2017 <- select(joint.data2017, MLR_DENOMINATOR, MLR_NUMERATOR, TOTAL_DIRECT_PREMIUM_EARNED)
+
+mutate.MLR2017.ind <- mutate(removed.extra.columns.joint2017, MLR = (MLR_NUMERATOR/MLR_DENOMINATOR))
+```
+
+```{r}
+small.companies2017.ind <- filter(mutate.MLR2017.ind, TOTAL_DIRECT_PREMIUM_EARNED <= 50000000, MLR != 0, MLR_DENOMINATOR > 0, TOTAL_DIRECT_PREMIUM_EARNED != 0)
+small.comp.mean.MLR2017 <- mean(small.companies2017.ind$MLR, na.rm = T, trim = .05)
+
+large.companies2017.ind <- filter(mutate.MLR2017.ind, TOTAL_DIRECT_PREMIUM_EARNED > 50000000, MLR > 0, MLR < 2)
+large.comp.mean.MLR2017.ind <- mean(large.companies2017.ind$MLR, na.rm = T, trim = .05)
+```
+
+Individual market 2011
+```{r}
+#Removing extra MLR columns
+filteredMLR2011 <- select(mlr2011, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_CY)
+#Spreading MLR data
+mlr2011.spread1 <- spread(filteredMLR2011, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_CY)
+#Removing extra premium columns
+filteredPremium2011 <- select(premium2011,  ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Spreading premium data
+premium2011.spread1 <- spread(filteredPremium2011, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Removing extra columns
+second.filter2011 <- select(premium2011.spread1,  ï..MR_SUBMISSION_TEMPLATE_ID, TOTAL_DIRECT_PREMIUM_EARNED)
+#Combining premium and MLR results
+joint.data2011 <- left_join(mlr2011.spread1, second.filter2011, by = NULL, copy = F)
+#Cleaned 
+removed.extra.columns.joint2011 <- select(joint.data2011, MLR_DENOMINATOR, MLR_NUMERATOR, TOTAL_DIRECT_PREMIUM_EARNED)
+
+mutate.MLR2011 <- mutate(removed.extra.columns.joint2011, MLR = (MLR_NUMERATOR/MLR_DENOMINATOR))
+```
+
+```{r}
+small.companies2011 <- filter(mutate.MLR2011, TOTAL_DIRECT_PREMIUM_EARNED <= 50000000, MLR != 0, MLR_DENOMINATOR > 0, TOTAL_DIRECT_PREMIUM_EARNED != 0)
+small.comp.mean.MLR2011 <- mean(small.companies2011$MLR, na.rm = T, trim = .05)
+
+large.companies2011 <- filter(mutate.MLR2011, TOTAL_DIRECT_PREMIUM_EARNED > 50000000, MLR != 0, MLR > -1000)
+large.comp.mean.MLR2011 <- mean(large.companies2011$MLR, na.rm = T, trim = .05)
+```
+
+
+Individual market 2012
+```{r}
+#Removing extra MLR columns
+filteredMLR2012 <- select(mlr2012, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+#Spreading MLR data
+mlr2012.spread1 <- spread(filteredMLR2012, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+#Removing extra premium columns
+#filteredPremium2012 <- select(premium2011,  ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Spreading premium data
+#premium2012.spread1 <- spread(filteredPremium2012, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Removing extra columns
+#second.filter2012 <- select(premium2012.spread1,  ï..MR_SUBMISSION_TEMPLATE_ID, TOTAL_DIRECT_PREMIUM_EARNED)
+#Combining premium and MLR results
+#joint.data2012 <- left_join(mlr2012.spread1, second.filter2012, by = NULL, copy = F)
+#Cleaned 
+#removed.extra.columns.joint2012 <- select(joint.data2012, PRELIMINARY_MLR, TOTAL_DIRECT_PREMIUM_EARNED)
+
+#mutate.MLR2012 <- mutate(removed.extra.columns.joint2012, MLR = (MLR_NUMERATOR/MLR_DENOMINATOR))
+```
+
+```{r}
+small.companies2012 <- filter(mlr2012.spread1, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2012 <- mean(small.companies2012$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2012 <- filter(mlr2012.spread1, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2012 <- mean(large.companies2012$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+
+Individual market 2013
+```{r}
+#Removing extra MLR columns
+filteredMLR2013 <- select(mlr2013, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+#Spreading MLR data
+mlr2013.spread1 <- spread(filteredMLR2013, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+```
+
+```{r}
+small.companies2013 <- filter(mlr2013.spread1, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2013 <- mean(small.companies2013$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2013 <- filter(mlr2013.spread1, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2013 <- mean(large.companies2013$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Individual market 2014
+```{r}
+#Removing extra MLR columns
+filteredMLR2014 <- select(mlr2014, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+#Spreading MLR data
+mlr2014.spread1 <- spread(filteredMLR2014, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+```
+
+```{r}
+small.companies2014 <- filter(mlr2013.spread1, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2014 <- mean(small.companies2014$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2014 <- filter(mlr2014.spread1, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2014 <- mean(large.companies2014$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Individual market 2015
+```{r}
+#Removing extra MLR columns
+filteredMLR2015 <- select(mlr2013, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+#Spreading MLR data
+mlr2015.spread1 <- spread(filteredMLR2015, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+```
+
+```{r}
+small.companies2015 <- filter(mlr2015.spread1, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2015 <- mean(small.companies2015$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2015 <- filter(mlr2015.spread1, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2015 <- mean(large.companies2015$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Individual market 2016
+```{r}
+#Removing extra MLR columns
+filteredMLR2016 <- select(mlr2016, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+#Spreading MLR data
+mlr2016.spread1 <- spread(filteredMLR2016, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+```
+
+```{r}
+small.companies2016 <- filter(mlr2016.spread1, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2016 <- mean(small.companies2016$PRELIMINARY_MLR, na.rm = TRUE, trim = .05)
+
+large.companies2016 <- filter(mlr2016.spread1, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2016 <- mean(large.companies2016$PRELIMINARY_MLR, na.rm = TRUE, trim = .05)
+```
+
+Individual market 2018
+```{r}
+#Removing extra MLR columns
+filteredMLR2018 <- select(mlr2018, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+#Spreading MLR data
+mlr2018.spread1 <- spread(filteredMLR2018, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_TOTAL)
+```
+
+```{r}
+small.companies2018 <- filter(mlr2018.spread1, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2018 <- mean(small.companies2018$PRELIMINARY_MLR, na.rm = TRUE, trim = .05)
+
+large.companies2018 <- filter(mlr2018.spread1, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2018 <- mean(large.companies2018$PRELIMINARY_MLR, na.rm = TRUE, trim = .05)
+```
+
+
+Stored graph values Individual Market
+```{r}
+ind.market.MLR.table <- data.table(type = c('Large', 'Large', 'Large', 'Large', 'Large', 'Large', 'Large','Large','Small', 'Small', 'Small', 'Small', 'Small', 'Small', 'Small','Small'), MLR = c(large.comp.mean.MLR2011, large.comp.mean.MLR2012, large.comp.mean.MLR2013, large.comp.mean.MLR2014, large.comp.mean.MLR2015, large.comp.mean.MLR2016, large.comp.mean.MLR2017.ind, large.comp.mean.MLR2018, small.comp.mean.MLR2011, small.comp.mean.MLR2012, small.comp.mean.MLR2013, small.comp.mean.MLR2014, small.comp.mean.MLR2015, small.comp.mean.MLR2016, small.comp.mean.MLR2017, small.comp.mean.MLR2018), year = c(2011,2012,2013,2014,2015,2016,2017,2018,2011,2012,2013,2014,2015,2016,2017,2018))
+
+ind.market.MLR.table$year <- factor(ind.market.MLR.table$year)
+```
+
+Individual Market Graph Small vs. Large company MLR
+```{r}
+ggplot(data = ind.market.MLR.table, aes(x = year, y = MLR, group = type, colour = type)) + 
+  geom_line() +
+  geom_point() +
+  geom_text(size = 3, nudge_y = .014, aes(label = round(MLR, 2))) +
+  xlab('Year') +
+  ylab('MLR') +
+  ggtitle('Mean Individual Market MLR for small and large Companies') +
+  theme_bw()
+
+```
+
+Individual Market Graph Small vs. Large company MLR
+```{r}
+ggplot(data = large.company.ind.market.MLR.table, aes(x = year, y = MLR, group = type, colour = type)) + 
+  geom_boxplot() +
+
+  #geom_text(size = 3, nudge_y = .014, aes(label = round(MLR, 2))) +
+  xlab('Year') +
+  ylab('MLR') +
+  ggtitle('Average Individual Market MLR for small and large Companies') +
+  theme_bw()
+
+```
+
+Small Group market 2018
+```{r}
+#Removing extra MLR columns
+filteredMLR2018.small <- select(mlr2018, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_TOTAL)
+#Spreading MLR data
+mlr2018.spread1.small <- spread(filteredMLR2018.small, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_TOTAL)
+```
+
+```{r}
+small.companies2018.small <- filter(mlr2018.spread1.small, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2018.small <- mean(small.companies2018.small$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2018.small <- filter(mlr2018.spread1.small, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2018.small <- mean(large.companies2018.small$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+
+Small Group market 2013
+```{r}
+#Removing extra MLR columns
+filteredMLR2013.small <- select(mlr2013, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_TOTAL)
+#Spreading MLR data
+mlr2013.spread1.small <- spread(filteredMLR2013.small, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_TOTAL)
+```
+
+```{r}
+small.companies2013.small <- filter(mlr2013.spread1.small, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2013.small <- mean(small.companies2013.small$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2013.small <- filter(mlr2013.spread1.small, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2013.small <- mean(large.companies2013.small$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Small Group market 2012
+```{r}
+#Removing extra MLR columns
+filteredMLR2012.small <- select(mlr2012, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_TOTAL)
+#Spreading MLR data
+mlr2012.spread1.small <- spread(filteredMLR2012.small, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_TOTAL)
+```
+
+```{r}
+small.companies2012.small <- filter(mlr2012.spread1.small, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2012.small <- mean(small.companies2012.small$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2012.small <- filter(mlr2012.spread1.small, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2012.small <- mean(large.companies2012.small$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Small Group market 2011
+```{r}
+#Removing extra MLR columns
+filteredMLR2011.small <- select(mlr2011, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_TOTAL)
+#Spreading MLR data
+mlr2011.spread1.small <- spread(filteredMLR2011.small, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_TOTAL)
+```
+
+```{r}
+small.companies2011.small <- filter(mlr2011.spread1.small, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2011.small <- mean(small.companies2011.small$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2011.small <- filter(mlr2011.spread1.small, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2011.small <- mean(large.companies2011.small$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+
+Small market 2017
+```{r}
+#Removing extra MLR columns
+filteredMLR2017 <- select(mlr2017, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_CY)
+#Spreading MLR data
+mlr2017.spread1 <- spread(filteredMLR2017, ROW_LOOKUP_CODE, CMM_SMALL_GROUP_CY)
+#Removing extra premium columns
+filteredPremium2017 <- select(premium2017, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Spreading premium data
+premium2017.spread1 <- spread(filteredPremium2017, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Removing extra columns
+second.filter2017 <- select(premium2017.spread1, MR_SUBMISSION_TEMPLATE_ID, TOTAL_DIRECT_PREMIUM_EARNED)
+#Combining premium and MLR results
+joint.data2017 <- left_join(mlr2017.spread1, second.filter2017, by = "MR_SUBMISSION_TEMPLATE_ID", copy = F)
+#Cleaned 
+removed.extra.columns.joint2017 <- select(joint.data2017, MLR_DENOMINATOR, MLR_NUMERATOR, TOTAL_DIRECT_PREMIUM_EARNED)
+
+mutate.MLR2017.small <- mutate(removed.extra.columns.joint2017, MLR = (MLR_NUMERATOR/MLR_DENOMINATOR))
+```
+
+```{r}
+small.companies2017.small <- filter(mutate.MLR2017.small, TOTAL_DIRECT_PREMIUM_EARNED <= 50000000, MLR != 0, MLR_DENOMINATOR > 0, TOTAL_DIRECT_PREMIUM_EARNED != 0)
+small.comp.mean.MLR2017.small <- mean(small.companies2017.small$MLR, na.rm = T, trim = .05)
+
+large.companies2017.small <- filter(mutate.MLR2017.small, TOTAL_DIRECT_PREMIUM_EARNED > 50000000, MLR != 0, MLR > -1000)
+large.comp.mean.MLR2017.small <- mean(large.companies2017.small$MLR, na.rm = T, trim = .05)
+```
+
+Stored graph values Small Group Market
+```{r}
+small.company.small.market.MLR.table <- data.table(MLR = c(small.comp.mean.MLR2011.small, small.comp.mean.MLR2012.small, small.comp.mean.MLR2013.small, small.comp.mean.MLR2017.small), year = c(2011,2012,2013,2017))
+
+large.company.small.market.MLR.table <- data.table(MLR = c(large.comp.mean.MLR2011.small, large.comp.mean.MLR2012.small, large.comp.mean.MLR2013.small, large.comp.mean.MLR2017.small), year = c(2011,2012,2013,2017))
+```
+
+Small Group Market Graph Small vs. Large company MLR
+Stored graph values Small Group Market
+```{r}
+large.company.small.market.MLR.table <- data.table(type = c('Large', 'Large', 'Large', 'Large', 'Small', 'Small', 'Small', 'Small'), MLR = c(large.comp.mean.MLR2011.small, large.comp.mean.MLR2012.small, large.comp.mean.MLR2013.small, large.comp.mean.MLR2017.small, small.comp.mean.MLR2011.small, small.comp.mean.MLR2012.small, small.comp.mean.MLR2013.small, small.comp.mean.MLR2017.small), year = c(2011,2012,2013,2017,2011,2012,2013,2017))
+
+large.company.small.market.MLR.table$year <- factor(large.company.small.market.MLR.table$year)
+```
+
+Individual Market Graph Small vs. Large company MLR
+```{r}
+ggplot(data = large.company.small.market.MLR.table, aes(x = year, y = MLR, group = type, colour = type)) + 
+  geom_line() +
+  geom_point() +
+  xlab('Year') +
+  ylab('MLR') +
+  ggtitle('Average Small Group Market MLR for small and large Companies') +
+  theme_bw()
+
+```
+
+Large Group market 2018
+```{r}
+#Removing extra MLR columns
+filteredMLR2018.large <- select(mlr2018, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_TOTAL)
+#Spreading MLR data
+mlr2018.spread1.large <- spread(filteredMLR2018.large, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_TOTAL)
+```
+
+```{r}
+small.companies2018.large <- filter(mlr2018.spread1.large, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2018.large <- mean(small.companies2018.large$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2018.large <- filter(mlr2018.spread1.large, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2018.large <- mean(large.companies2018.large$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Large Group market 2017
+```{r}
+#Removing extra MLR columns
+filteredMLR2017 <- select(mlr2017, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_CY)
+#Spreading MLR data
+mlr2017.spread1 <- spread(filteredMLR2017, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_CY)
+#Removing extra premium columns
+filteredPremium2017 <- select(premium2017, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Spreading premium data
+premium2017.spread1 <- spread(filteredPremium2017, ROW_LOOKUP_CODE, OTHER_HEALTH_BUSINESS_YEARLY)
+#Removing extra columns
+second.filter2017 <- select(premium2017.spread1, MR_SUBMISSION_TEMPLATE_ID, TOTAL_DIRECT_PREMIUM_EARNED)
+#Combining premium and MLR results
+joint.data2017 <- left_join(mlr2017.spread1, second.filter2017, by = "MR_SUBMISSION_TEMPLATE_ID", copy = F)
+#Cleaned 
+removed.extra.columns.joint2017 <- select(joint.data2017, MLR_DENOMINATOR, MLR_NUMERATOR, TOTAL_DIRECT_PREMIUM_EARNED)
+
+mutate.MLR2017.large <- mutate(removed.extra.columns.joint2017, MLR = (MLR_NUMERATOR/MLR_DENOMINATOR))
+```
+
+```{r}
+small.companies2017.large <- filter(mutate.MLR2017.large, TOTAL_DIRECT_PREMIUM_EARNED <= 50000000, MLR != 0, MLR_DENOMINATOR > 0, TOTAL_DIRECT_PREMIUM_EARNED != 0)
+small.comp.mean.MLR2017.large <- mean(small.companies2017.large$MLR, na.rm = T, trim = .05)
+
+large.companies2017.large <- filter(mutate.MLR2017.large, TOTAL_DIRECT_PREMIUM_EARNED > 50000000, MLR != 0, MLR > -1000)
+large.comp.mean.MLR2017.large <- mean(large.companies2017.large$MLR, na.rm = T, trim = .05)
+```
+
+Large Group market 2013
+```{r}
+#Removing extra MLR columns
+filteredMLR2013.large <- select(mlr2013, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_TOTAL)
+#Spreading MLR data
+mlr2013.spread1.large <- spread(filteredMLR2013.large, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_TOTAL)
+```
+
+```{r}
+small.companies2013.large <- filter(mlr2013.spread1.large, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2013.large <- mean(small.companies2013.large$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2013.large <- filter(mlr2013.spread1.large, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2013.large <- mean(large.companies2013.large$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Large Group market 2012
+```{r}
+#Removing extra MLR columns
+filteredMLR2012.large <- select(mlr2012, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_TOTAL)
+#Spreading MLR data
+mlr2012.spread1.large <- spread(filteredMLR2012.large, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_TOTAL)
+```
+
+```{r}
+small.companies2012.large <- filter(mlr2012.spread1.large, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2012.large <- mean(small.companies2012.large$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2012.large <- filter(mlr2012.spread1.large, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2012.large <- mean(large.companies2012.large$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Large Group market 2011
+```{r}
+#Removing extra MLR columns
+filteredMLR2011.large <- select(mlr2011, ï..MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_TOTAL)
+#Spreading MLR data
+mlr2011.spread1.large <- spread(filteredMLR2011.large, ROW_LOOKUP_CODE, CMM_LARGE_GROUP_TOTAL)
+```
+
+```{r}
+small.companies2011.large <- filter(mlr2011.spread1.large, PREMIUM_EARNED_INCLUDING_FSHRP <= 50000000, PRELIMINARY_MLR != 0, PREMIUM_EARNED_INCLUDING_FSHRP != 0)
+small.comp.mean.MLR2011.large <- mean(small.companies2011.large$PRELIMINARY_MLR, na.rm = T, trim = .05)
+
+large.companies2011.large <- filter(mlr2011.spread1.large, PREMIUM_EARNED_INCLUDING_FSHRP > 50000000, PRELIMINARY_MLR != 0, PRELIMINARY_MLR > -1000)
+large.comp.mean.MLR2011.large <- mean(large.companies2011.large$PRELIMINARY_MLR, na.rm = T, trim = .05)
+```
+
+Stored graph values Large Group Market
+```{r}
+small.company.large.market.MLR.table <- data.table(MLR = c(small.comp.mean.MLR2011.large, small.comp.mean.MLR2012.large, small.comp.mean.MLR2013.large, small.comp.mean.MLR2017.large), year = c(2011,2012,2013,2017))
+
+large.company.large.market.MLR.table <- data.table(MLR = c(large.comp.mean.MLR2011.large, large.comp.mean.MLR2012.large, large.comp.mean.MLR2013.large, large.comp.mean.MLR2017.large), year = c(2011,2012,2013,2017))
+```
+
+Large Group Market Graph Small vs. Large company MLR
+```{r}
+ggplot() + 
+  geom_line(data = small.company.large.market.MLR.table, aes(x = year, y = MLR), color = "blue") +
+  geom_line(data = large.company.large.market.MLR.table, aes(x = year, y = MLR), color = "red") +
+  xlab('Year') +
+  ylab('MLR') +
+  ggtitle('Average Large Group Market MLR for small and large Companies') +
+  scale_x_continuous(breaks = c(2011,2012,2013,2017))
+
+```
+
+Stored graph values Small Group Market
+```{r}
+large.company.large.market.MLR.table <- data.table(type = c('Large', 'Large', 'Large', 'Large', 'Small', 'Small', 'Small', 'Small'), MLR = c(large.comp.mean.MLR2011.large, large.comp.mean.MLR2012.large, large.comp.mean.MLR2013.large, large.comp.mean.MLR2017.large, small.comp.mean.MLR2011.large, small.comp.mean.MLR2012.large, small.comp.mean.MLR2013.large, small.comp.mean.MLR2017.large), year = c(2011,2012,2013,2017,2011,2012,2013,2017))
+
+large.company.large.market.MLR.table$year <- factor(large.company.large.market.MLR.table$year)
+```
+
+Individual Market Graph Small vs. Large company MLR
+```{r}
+ggplot(data = large.company.large.market.MLR.table, aes(x = year, y = MLR, group = type, colour = type)) + 
+  geom_line() +
+  geom_point() +
+  xlab('Year') +
+  ylab('MLR') +
+  ggtitle('Average Large Group Market MLR for small and large Companies') +
+  theme_bw()
+
+```
+
+Average MLR for small companies over all 3 markets
+```{r}
+small.comp.mean.MLR2013.ind.total <- c(small.companies2013$PRELIMINARY_MLR)
+small.comp.mean.MLR2013.small.total <- c(small.companies2013.small$PRELIMINARY_MLR)
+small.comp.mean.MLR2013.large.total <- c(small.companies2013.large$PRELIMINARY_MLR)
+average.mlr.all.markets.2013 <- mean(c(small.comp.mean.MLR2013.ind.total, small.comp.mean.MLR2013.small.total, small.comp.mean.MLR2013.large.total), na.rm = T, trim = .05)
+
+small.comp.mean.MLR2012.ind.total <- c(small.companies2012$PRELIMINARY_MLR)
+small.comp.mean.MLR2012.small.total <- c(small.companies2012.small$PRELIMINARY_MLR)
+small.comp.mean.MLR2012.large.total <- c(small.companies2012.large$PRELIMINARY_MLR)
+average.mlr.all.markets.2012 <- mean(c(small.comp.mean.MLR2012.ind.total, small.comp.mean.MLR2012.small.total, small.comp.mean.MLR2012.large.total), na.rm = T, trim = .05)
+
+small.comp.mean.MLR2011.ind.total <- c(small.companies2011$PRELIMINARY_MLR)
+small.comp.mean.MLR2011.small.total <- c(small.companies2011.small$PRELIMINARY_MLR)
+small.comp.mean.MLR2011.large.total <- c(small.companies2011.large$PRELIMINARY_MLR)
+average.mlr.all.markets.2011 <- mean(c(small.comp.mean.MLR2011.ind.total, small.comp.mean.MLR2011.small.total, small.comp.mean.MLR2011.large.total), na.rm = T, trim = .05)
+
+small.comp.mean.MLR2017.ind.total <- c(small.companies2017$MLR)
+small.comp.mean.MLR2017.small.total <- c(small.companies2017.small$MLR)
+small.comp.mean.MLR2017.large.total <- c(small.companies2017.large$MLR)
+average.mlr.all.markets.2017 <- mean(c(small.comp.mean.MLR2017.ind.total, small.comp.mean.MLR2017.small.total, small.comp.mean.MLR2017.large.total), na.rm = T, trim = .05)
+
+small.company.average.table <- data.table(MLR = c(average.mlr.all.markets.2011, average.mlr.all.markets.2012, average.mlr.all.markets.2013, average.mlr.all.markets.2017), year = c(2011,2012,2013,2017))
+```
+
+Average MLR for small companies over all 3 markets
+```{r}
+large.comp.mean.MLR2013.ind.total <- c(large.companies2013$PRELIMINARY_MLR)
+large.comp.mean.MLR2013.small.total <- c(large.companies2013.small$PRELIMINARY_MLR)
+large.comp.mean.MLR2013.large.total <- c(large.companies2013.large$PRELIMINARY_MLR)
+average.mlr.all.markets.2013 <- mean(c(large.comp.mean.MLR2013.ind.total, large.comp.mean.MLR2013.small.total, large.comp.mean.MLR2013.large.total), na.rm = T, trim = .05)
+
+large.comp.mean.MLR2012.ind.total <- c(large.companies2012$PRELIMINARY_MLR)
+large.comp.mean.MLR2012.small.total <- c(large.companies2012.small$PRELIMINARY_MLR)
+large.comp.mean.MLR2012.large.total <- c(large.companies2012.large$PRELIMINARY_MLR)
+average.mlr.all.markets.2012 <- mean(c(large.comp.mean.MLR2012.ind.total, large.comp.mean.MLR2012.small.total, large.comp.mean.MLR2012.large.total), na.rm = T, trim = .05)
+
+large.comp.mean.MLR2011.ind.total <- c(large.companies2011$PRELIMINARY_MLR)
+large.comp.mean.MLR2011.small.total <- c(large.companies2011.small$PRELIMINARY_MLR)
+large.comp.mean.MLR2011.large.total <- c(large.companies2011.large$PRELIMINARY_MLR)
+average.mlr.all.markets.2011 <- mean(c(large.comp.mean.MLR2011.ind.total, large.comp.mean.MLR2011.small.total, large.comp.mean.MLR2011.large.total), na.rm = T, trim = .05)
+
+large.comp.mean.MLR2017.ind.total <- c(large.companies2017$MLR)
+large.comp.mean.MLR2017.small.total <- c(large.companies2017.small$MLR)
+large.comp.mean.MLR2017.large.total <- c(large.companies2017.large$MLR)
+average.mlr.all.markets.2017 <- mean(c(large.comp.mean.MLR2017.ind.total, large.comp.mean.MLR2017.small.total, large.comp.mean.MLR2017.large.total), na.rm = T, trim = .05)
+
+large.company.average.table <- data.table(MLR = c(average.mlr.all.markets.2011, average.mlr.all.markets.2012, average.mlr.all.markets.2013, average.mlr.all.markets.2017), year = c(2011,2012,2013,2017))
+```
+
+All markets Graph Small vs. Large company MLR
+```{r}
+ggplot() + 
+  geom_line(data = small.company.average.table, aes(x = year, y = MLR), color = "blue") +
+  geom_line(data = large.company.average.table, aes(x = year, y = MLR), color = "red") +
+  
+  xlab('Year') +
+  ylab('MLR') +
+  ggtitle('Average MLR across all markets for small and large Companies') +
+  scale_x_continuous(breaks = c(2011,2012,2013,2017))
+
+```
+
+
+
+
+

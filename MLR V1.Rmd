@@ -1,0 +1,469 @@
+---
+title: "Medical Loss Ratios"
+author: "Alec Henriksen"
+date: "June 10, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rmarkdown)
+library(knitr)
+library(readxl)
+library(Stat2Data)
+library(tidyverse)
+library(reshape)
+```
+
+## R Markdown
+
+```{r}
+#mlr2017 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2017 MLR Part 1-2.csv")
+#mlr2016 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2016 MLR Part 1-2.csv")
+#mlr2015 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2015 MLR Part 1-2.csv")
+#mlr2014 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2014 MLR Part 1-2.csv")
+#mlr2013 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2013 MLR Part 1-2.csv")
+#mlr2012 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2012 MLR Part 1-2.csv")
+#mlr2011 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2011 MLR Part 1-2.csv")
+```
+
+```{r}
+mlr2017 <- read.csv("C:/Users/AlecH/OneDrive/Documents/2017_Part3_MLR_Rebate_Calculation.csv")
+```
+
+Stored graph values
+```{r}
+margins.per.member.per.month <- c()
+yearly.simple.mlr <- c()
+```
+
+Original Filtering technique (Current Flaws)
+```{r}
+filtered <- select(mlr2017, MR_SUBMISSION_TEMPLATE_ID, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_CY)
+mlr2017.spread1 <- spread(filtered, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_CY)
+#mlr2017.spread1 <- spread(mlr2017, MR_SUBMISSION_TEMPLATE_ID, CMM_INDIVIDUAL_CY)
+#mlr2016.spread1 <- spread(mlr2016, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_YEARLY)
+#mlr2015.spread1 <- spread(mlr2015, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_YEARLY)
+mlr2014.spread1 <- spread(mlr2014, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_YEARLY)
+mlr2013.spread1 <- spread(mlr2013, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_YEARLY)
+mlr2012.spread1 <- spread(mlr2012, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_YEARLY)
+mlr2011.spread1 <- spread(mlr2011, ROW_LOOKUP_CODE, CMM_INDIVIDUAL_YEARLY)
+```
+
+
+
+Margins per month 2017 (Safe Way)
+```{r}
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2017.monthsum <- sum(mlr2017.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2017.totalpremium <- sum(mlr2017.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2017.totalclaims <- sum(mlr2017.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+margins.per.member.per.month[7] = (mlr2017.totalpremium - mlr2017.totalclaims)/mlr2017.monthsum
+```
+
+Margins per month 2017 (Ideal Way)
+```{r}
+#mlr2017.monthsum <- sum(mlr2017.spread1$MEMBER_MONTHS, na.rm = T)
+#mlr2017.totalpremium <- sum(mlr2017.spread1$TOTAL_DIRECT_PREMIUM_EARNED, na.rm = T)
+#mlr2017.totalclaims <- sum(mlr2017.spread1$TOTAL_INCURRED_CLAIMS_PT1, na.rm = T)
+#margins.per.member.per.month[7] = (mlr2017.totalpremium - mlr2017.totalclaims)/mlr2017.monthsum
+```
+
+
+Margins per month 2016 (Safe Way)
+```{r}
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2016.monthsum <- sum(mlr2016.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2016.totalpremium <- sum(mlr2016.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2016.totalclaims <- sum(mlr2016.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+margins.per.member.per.month[6] = (mlr2016.totalpremium - mlr2016.totalclaims)/mlr2016.monthsum
+```
+
+Margins per month 2016 (Ideal Way)
+```{r}
+#mlr2016.monthsum <- sum(mlr2016.spread1$MEMBER_MONTHS, na.rm = T)
+#mlr2016.totalpremium <- sum(mlr2016.spread1$TOTAL_DIRECT_PREMIUM_EARNED, na.rm = T)
+#mlr2016.totalclaims <- sum(mlr2016.spread1$TOTAL_INCURRED_CLAIMS_PT1, na.rm = T)
+#margins.per.member.per.month[6] = (mlr2016.totalpremium - mlr2016.totalclaims)/mlr2016.monthsum
+
+```
+
+Margins per month 2015 (Safe Way)
+```{r}
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2015.monthsum <- sum(mlr2015.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2015.totalpremium <- sum(mlr2015.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2015.totalclaims <- sum(mlr2015.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+margins.per.member.per.month[5] = (mlr2015.totalpremium - mlr2015.totalclaims)/mlr2015.monthsum
+```
+
+Margins per month 2015 (Ideal Way)
+```{r}
+#mlr2015.monthsum <- sum(mlr2015.spread1$MEMBER_MONTHS, na.rm = T)
+#mlr2015.totalpremium <- sum(mlr2015.spread1$TOTAL_DIRECT_PREMIUM_EARNED, na.rm = T)
+#mlr2015.totalclaims <- sum(mlr2015.spread1$TOTAL_INCURRED_CLAIMS_PT1, na.rm = T)
+#margins.per.member.per.month[5] = (mlr2015.totalpremium - mlr2015.totalclaims)/mlr2015.monthsum
+
+```
+
+Margins per month 2014 (Safe Way)
+```{r}
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2014.monthsum <- sum(mlr2014.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2014.totalpremium <- sum(mlr2014.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2014.totalclaims <- sum(mlr2014.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+margins.per.member.per.month[4] = (mlr2014.totalpremium - mlr2014.totalclaims)/mlr2014.monthsum
+```
+
+Margins per month 2014 (Ideal Way)
+```{r}
+#mlr2014.monthsum <- sum(mlr2014.spread1$MEMBER_MONTHS, na.rm = T)
+#mlr2014.totalpremium <- sum(mlr2014.spread1$TOTAL_DIRECT_PREMIUM_EARNED, na.rm = T)
+#mlr2014.totalclaims <- sum(mlr2014.spread1$TOTAL_INCURRED_CLAIMS_PT1, na.rm = T)
+#margins.per.member.per.month[4] = (mlr2014.totalpremium - mlr2014.totalclaims)/mlr2014.monthsum
+
+```
+
+Margins per month 2013 (Safe Way)
+```{r}
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2013.monthsum <- sum(mlr2013.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2013.totalpremium <- sum(mlr2013.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2013.totalclaims <- sum(mlr2013.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+margins.per.member.per.month[3] = (mlr2013.totalpremium - mlr2013.totalclaims)/mlr2013.monthsum
+```
+
+Margins per month 2013 (Ideal Way)
+```{r}
+#mlr2013.monthsum <- sum(mlr2013.spread1$MEMBER_MONTHS, na.rm = T)
+#mlr2013.totalpremium <- sum(mlr2013.spread1$TOTAL_DIRECT_PREMIUM_EARNED, na.rm = T)
+#mlr2013.totalclaims <- sum(mlr2013.spread1$TOTAL_INCURRED_CLAIMS_PT1, na.rm = T)
+#margins.per.member.per.month[3] = (mlr2013.totalpremium - mlr2013.totalclaims)/mlr2013.monthsum
+
+```
+
+Margins per month 2012 (Safe Way)
+```{r}
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2012.monthsum <- sum(mlr2012.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2012.totalpremium <- sum(mlr2012.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2012.totalclaims <- sum(mlr2012.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+margins.per.member.per.month[2] = (mlr2012.totalpremium - mlr2012.totalclaims)/mlr2012.monthsum
+```
+
+Margins per month 2012 (Ideal Way)
+```{r}
+#mlr2012.monthsum <- sum(mlr2012.spread1$MEMBER_MONTHS, na.rm = T)
+#mlr2012.totalpremium <- sum(mlr2012.spread1$TOTAL_DIRECT_PREMIUM_EARNED, na.rm = T)
+#mlr2012.totalclaims <- sum(mlr2012.spread1$TOTAL_INCURRED_CLAIMS_PT1, na.rm = T)
+#margins.per.member.per.month[2] = (mlr2012.totalpremium - mlr2012.totalclaims)/mlr2012.monthsum
+
+```
+
+Margins per month 2011 (Safe Way)
+```{r}
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2011.monthsum <- sum(mlr2011.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2011.totalpremium <- sum(mlr2011.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "ADJUSTED_INCURRED_CLAIMS")
+mlr2011.totalclaims <- sum(mlr2011.spread1$CMM_INDIVIDUAL_YEARLY, na.rm = T)
+margins.per.member.per.month[1] = (mlr2011.totalpremium - mlr2011.totalclaims)/mlr2011.monthsum
+```
+
+Margins per month 2011 (Ideal Way)
+```{r}
+#mlr2011.monthsum <- sum(mlr2011.spread1$MEMBER_MONTHS, na.rm = T)
+#mlr2011.totalpremium <- sum(mlr2011.spread1$TOTAL_DIRECT_PREMIUM_EARNED, na.rm = T)
+#adj.2011.claims <- mlr2011.spread1$DIRECT_CLAIM_LIABILITY_CURR_YR[!is.na(mlr2011.spread1$DIRECT_CLAIM_LIABILITY_CURR_YR)]
+#adj.2011.claims <- abs(adj.2011.claims)
+#mlr2011.totalclaims <- sum(adj.2011.claims, na.rm = T)
+#margins.per.member.per.month[1] = (mlr2011.totalpremium - mlr2011.totalclaims)/mlr2011.monthsum
+
+```
+
+
+
+Margins per month graph
+```{r}
+ggplot(,aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = margins.per.member.per.month)) + geom_line() + geom_text(aes(label = round(margins.per.member.per.month, digits=2), hjust = .50, vjust = .50)) + ggtitle("Average Individual Market Gross Margins Per Member Per Month, 2011-2017") + theme(axis.title = element_blank()) + scale_x_discrete(limits = c(2011, 2012, 2013, 2014, 2015, 2016, 2017)) + scale_y_discrete(limits = c(-20, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180)) 
+```
+
+Simple mlr Individual 2017
+```{r}
+yearly.simple.mlr[7] <- mlr2017.totalclaims / mlr2017.totalpremium
+
+#casted2017 <- cast(mlr2017.spread1, MR_SUBMISSION_TEMPLATE_ID ~ CMM_INDIVIDUAL_YEARLY)
+```
+
+Simple mlr Individual 2016
+```{r}
+yearly.simple.mlr[6] <- mlr2016.totalclaims / mlr2016.totalpremium
+```
+
+Simple mlr Individual 2015
+```{r}
+yearly.simple.mlr[5] <- mlr2015.totalclaims / mlr2015.totalpremium
+```
+
+Simple mlr Individual 2014
+```{r}
+yearly.simple.mlr[4] <- mlr2014.totalclaims / mlr2014.totalpremium
+```
+
+Simple mlr Individual 2013
+```{r}
+yearly.simple.mlr[3] <- mlr2013.totalclaims / mlr2013.totalpremium
+```
+
+Simple mlr Individual 2012
+```{r}
+yearly.simple.mlr[2] <- mlr2012.totalclaims / mlr2012.totalpremium
+```
+
+Simple mlr Individual 2011
+```{r}
+yearly.simple.mlr[1] <- mlr2011.totalclaims / mlr2011.totalpremium
+```
+
+Simple mlr Individual graph
+```{r}
+ggplot(,aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = yearly.simple.mlr)) + geom_line() + geom_text(aes(label = round(yearly.simple.mlr, digits=2), hjust = .50, vjust = .50)) + ggtitle("Average Individual Market Medical Loss Ratios, 2011-2017") + theme(axis.title = element_blank()) + scale_x_discrete(limits = c(2011, 2012, 2013, 2014, 2015, 2016, 2017)) + scale_y_continuous(limits = c(.65, 1.05))
+
+```
+
+Vectors to graph small group margins and simple mlr
+```{r}
+margins.per.member.per.month.smallgroup <- c()
+yearly.simple.mlr.smallgroup <- c()
+
+```
+
+Margins per month Small Group 2017 (Safe Way)
+```{r}
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2017.monthsum <- sum(mlr2017.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2017.totalpremium <- sum(mlr2017.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2017.totalclaims <- sum(mlr2017.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.smallgroup[7] = (mlr2017.totalpremium - mlr2017.totalclaims)/mlr2017.monthsum
+
+```
+
+Margins per month Small Group 2016 (Safe Way)
+```{r}
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2016.monthsum <- sum(mlr2016.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2016.totalpremium <- sum(mlr2016.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2016.totalclaims <- sum(mlr2016.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.smallgroup[6] = (mlr2016.totalpremium - mlr2016.totalclaims)/mlr2016.monthsum
+```
+
+Margins per month Small Group 2015 (Safe Way)
+```{r}
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2015.monthsum <- sum(mlr2015.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2015.totalpremium <- sum(mlr2015.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2015.totalclaims <- sum(mlr2015.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.smallgroup[5] = (mlr2015.totalpremium - mlr2015.totalclaims)/mlr2015.monthsum
+```
+
+Margins per month Small Group 2014 (Safe Way)
+```{r}
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2014.monthsum <- sum(mlr2014.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2014.totalpremium <- sum(mlr2014.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2014.totalclaims <- sum(mlr2014.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.smallgroup[4] = (mlr2014.totalpremium - mlr2014.totalclaims)/mlr2014.monthsum
+```
+
+Margins per month Small Group 2013 (Safe Way)
+```{r}
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2013.monthsum <- sum(mlr2013.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2013.totalpremium <- sum(mlr2013.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2013.totalclaims <- sum(mlr2013.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.smallgroup[3] = (mlr2013.totalpremium - mlr2013.totalclaims)/mlr2013.monthsum
+```
+
+Margins per month Small Group 2012 (Safe Way)
+```{r}
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2012.monthsum <- sum(mlr2012.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2012.totalpremium <- sum(mlr2012.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2012.totalclaims <- sum(mlr2012.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.smallgroup[2] = (mlr2012.totalpremium - mlr2012.totalclaims)/mlr2012.monthsum
+```
+
+Margins per month Small Group 2011 (Safe Way)
+```{r}
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2011.monthsum <- sum(mlr2011.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2011.totalpremium <- sum(mlr2011.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "ADJUSTED_INCURRED_CLAIMS")
+mlr2011.totalclaims <- sum(mlr2011.spread1$CMM_SMALL_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.smallgroup[1] = (mlr2011.totalpremium - mlr2011.totalclaims)/mlr2011.monthsum
+```
+
+Graph of Small Group Market Margins per member per month
+```{r}
+ggplot(,aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = margins.per.member.per.month.smallgroup)) + geom_line() + geom_text(aes(label = round(margins.per.member.per.month.smallgroup, digits=2), hjust = .50, vjust = .50)) + ggtitle("Average Small Market Gross Margins Per Member Per Month, 2011-2017") + theme(axis.title = element_blank()) + scale_x_discrete(limits = c(2011, 2012, 2013, 2014, 2015, 2016, 2017)) + scale_y_continuous(limits = c(60, 100)) 
+```
+
+Vectors to graph large group margins and simple mlr
+```{r}
+margins.per.member.per.month.largegroup <- c()
+yearly.simple.mlr.largegroup <- c()
+
+```
+
+Margins per month Large Group 2017 (Safe Way)
+```{r}
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2017.monthsum <- sum(mlr2017.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2017.totalpremium <- sum(mlr2017.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2017.spread1 <- filter(mlr2017, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2017.totalclaims <- sum(mlr2017.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.largegroup[7] = (mlr2017.totalpremium - mlr2017.totalclaims)/mlr2017.monthsum
+
+```
+
+Margins per month Large Group 2016 (Safe Way)
+```{r}
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2016.monthsum <- sum(mlr2016.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2016.totalpremium <- sum(mlr2016.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2016.spread1 <- filter(mlr2016, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2016.totalclaims <- sum(mlr2016.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.largegroup[6] = (mlr2016.totalpremium - mlr2016.totalclaims)/mlr2016.monthsum
+```
+
+Margins per month Large Group 2015 (Safe Way)
+```{r}
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2015.monthsum <- sum(mlr2015.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2015.totalpremium <- sum(mlr2015.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2015.spread1 <- filter(mlr2015, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2015.totalclaims <- sum(mlr2015.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.largegroup[5] = (mlr2015.totalpremium - mlr2015.totalclaims)/mlr2015.monthsum
+```
+
+Margins per month Large Group 2014 (Safe Way)
+```{r}
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2014.monthsum <- sum(mlr2014.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2014.totalpremium <- sum(mlr2014.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2014.spread1 <- filter(mlr2014, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2014.totalclaims <- sum(mlr2014.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.largegroup[4] = (mlr2014.totalpremium - mlr2014.totalclaims)/mlr2014.monthsum
+```
+
+Margins per month Large Group 2013 (Safe Way)
+```{r}
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2013.monthsum <- sum(mlr2013.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2013.totalpremium <- sum(mlr2013.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2013.spread1 <- filter(mlr2013, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2013.totalclaims <- sum(mlr2013.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.largegroup[3] = (mlr2013.totalpremium - mlr2013.totalclaims)/mlr2013.monthsum
+```
+
+Margins per month Large Group 2012 (Safe Way)
+```{r}
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2012.monthsum <- sum(mlr2012.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2012.totalpremium <- sum(mlr2012.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2012.spread1 <- filter(mlr2012, ROW_LOOKUP_CODE == "TOTAL_INCURRED_CLAIMS_PT2")
+mlr2012.totalclaims <- sum(mlr2012.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.largegroup[2] = (mlr2012.totalpremium - mlr2012.totalclaims)/mlr2012.monthsum
+```
+
+Margins per month Large Group 2011 (Safe Way)
+```{r}
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "MEMBER_MONTHS")
+mlr2011.monthsum <- sum(mlr2011.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "TOTAL_DIRECT_PREMIUM_EARNED")
+mlr2011.totalpremium <- sum(mlr2011.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+mlr2011.spread1 <- filter(mlr2011, ROW_LOOKUP_CODE == "ADJUSTED_INCURRED_CLAIMS")
+mlr2011.totalclaims <- sum(mlr2011.spread1$CMM_LARGE_GROUP_YEARLY, na.rm = T)
+margins.per.member.per.month.largegroup[1] = (mlr2011.totalpremium - mlr2011.totalclaims)/mlr2011.monthsum
+```
+
+Graph of Large Group Market Margins per member per month
+```{r}
+ggplot(,aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = margins.per.member.per.month.largegroup)) + geom_line() + geom_text(aes(label = round(margins.per.member.per.month.largegroup, digits=2), hjust = .50, vjust = .50)) + ggtitle("Average Large Market Gross Margins Per Member Per Month, 2011-2017") + theme(axis.title = element_blank()) + scale_x_discrete(limits = c(2011, 2012, 2013, 2014, 2015, 2016, 2017)) + scale_y_continuous(limits = c(40, 80)) 
+```
+
+Graph of Large, small, and individual Group Market Margins per member per month
+```{r}
+ggplot() + geom_line(aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = margins.per.member.per.month.largegroup)) + geom_line(aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = margins.per.member.per.month.smallgroup)) + geom_line(aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = margins.per.member.per.month))
+  ggtitle("Average Large Market Gross Margins Per Member Per Month, 2011-2017") + theme(axis.title = element_blank()) + scale_x_discrete(limits = c(2011, 2012, 2013, 2014, 2015, 2016, 2017)) + scale_y_continuous(limits = c(40, 120)) 
+```
+
+
+Premiums and claims from 2011-2017
+```{r}
+premiums <- c()
+claims <- c()
+
+premiums[1] <- mlr2011.totalpremium
+premiums[2] <- mlr2012.totalpremium
+premiums[3] <- mlr2013.totalpremium
+premiums[4] <- mlr2014.totalpremium
+premiums[5] <- mlr2015.totalpremium
+premiums[6] <- mlr2016.totalpremium
+premiums[7] <- mlr2017.totalpremium
+
+claims[1] <- mlr2011.totalclaims
+claims[2] <- mlr2012.totalclaims
+claims[3] <- mlr2013.totalclaims
+claims[4] <- mlr2014.totalclaims
+claims[5] <- mlr2015.totalclaims
+claims[6] <- mlr2016.totalclaims
+claims[7] <- mlr2017.totalclaims
+
+```
+
+Graph total premiums 2011-2017
+```{r}
+ggplot() + geom_line(aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = premiums)) + geom_line(aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = claims))  + ggtitle("Total Premiums by year, 2011-2017") + theme(axis.title = element_blank()) + scale_x_discrete(limits = c(2011, 2012, 2013, 2014, 2015, 2016, 2017)) 
+#+ scale_y_discrete(limits = c(-20, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180)) 
+#+ geom_text(aes(label = round(premiums, digits=2), hjust = .50, vjust = .50))
+```
+
+Graph toal claims 2011-2017
+```{r}
+ggplot(,aes(x = c(2011, 2012, 2013, 2014, 2015, 2016, 2017), y = claims)) + geom_line()  + ggtitle("Total Claims by year, 2011-2017") + theme(axis.title = element_blank()) + scale_x_discrete(limits = c(2011, 2012, 2013, 2014, 2015, 2016, 2017)) 
+#+ scale_y_discrete(limits = c(-20, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180)) 
+#+ geom_text(aes(label = round(claims, digits=2), hjust = .50, vjust = .50))
+```

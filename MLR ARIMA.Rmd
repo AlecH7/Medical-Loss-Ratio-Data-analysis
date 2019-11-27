@@ -1,0 +1,151 @@
+---
+title: "MLR ARIMA"
+author: "Alec Henriksen"
+date: "September 20, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(forecast)
+library(lmtest)
+```
+
+## R Markdown
+
+Stored graph values Individual Market
+```{r}
+large.company.ind.market.MLR.table <- data.table(type = c('Large', 'Large', 'Large', 'Large', 'Large', 'Large', 'Large'), MLR = c(large.comp.median.MLR2011, large.comp.median.MLR2012, large.comp.median.MLR2013, large.comp.median.MLR2014, large.comp.median.MLR2015, large.comp.median.MLR2016, large.comp.median.MLR2017), year = c(2011,2012,2013,2014,2015,2016,2017))
+
+large.company.ind.market.MLR.table$year <- factor(large.company.ind.market.MLR.table$year)
+
+small.company.ind.market.MLR.table <- data.table(type = c('Small', 'Small', 'Small', 'Small', 'Small', 'Small', 'Small'), MLR = c(small.comp.median.MLR2011, small.comp.median.MLR2012, small.comp.median.MLR2013, small.comp.median.MLR2014, small.comp.median.MLR2015, small.comp.median.MLR2016, small.comp.median.MLR2017), year = c(2011,2012,2013,2014,2015,2016,2017))
+
+small.company.ind.market.MLR.table$year <- factor(small.company.ind.market.MLR.table$year)
+```
+
+Stored graph values Small Group Market
+```{r}
+large.company.small.market.MLR.table <- data.table(type = c('Large', 'Large', 'Large', 'Large', 'Large', 'Large', 'Large'), MLR = c(large.comp.median.MLR2011.small, large.comp.median.MLR2012.small, large.comp.median.MLR2013.small, large.comp.median.MLR2014.small, large.comp.median.MLR2015.small, large.comp.median.MLR2016.small, large.comp.median.MLR2017.small), year = c(2011,2012,2013,2014,2015,2016,2017))
+
+large.company.small.market.MLR.table$year <- factor(large.company.small.market.MLR.table$year)
+
+small.company.small.market.MLR.table <- data.table(type = c('Small', 'Small', 'Small', 'Small', 'Small', 'Small', 'Small'), MLR = c(small.comp.median.MLR2011.small, small.comp.median.MLR2012.small, small.comp.median.MLR2013.small, small.comp.median.MLR2014.small, small.comp.median.MLR2015.small, small.comp.median.MLR2016.small, small.comp.median.MLR2017.small), year = c(2011,2012,2013,2014,2015,2016,2017))
+
+small.company.small.market.MLR.table$year <- factor(small.company.small.market.MLR.table$year)
+```
+
+Stored graph values Large Group Market
+```{r}
+large.company.large.market.MLR.table <- data.table(type = c('Large', 'Large', 'Large', 'Large', 'Large', 'Large', 'Large'), MLR = c(large.comp.median.MLR2011.large, large.comp.median.MLR2012.large, large.comp.median.MLR2013.large, large.comp.median.MLR2014.large, large.comp.median.MLR2015.large, large.comp.median.MLR2016.large, large.comp.median.MLR2017.large), year = c(2011,2012,2013,2014,2015,2016,2017))
+
+large.company.large.market.MLR.table$year <- factor(large.company.large.market.MLR.table$year)
+
+small.company.large.market.MLR.table <- data.table(type = c('Small', 'Small', 'Small', 'Small', 'Small', 'Small', 'Small'), MLR = c(small.comp.median.MLR2011.large, small.comp.median.MLR2012.large, small.comp.median.MLR2013.large, small.comp.median.MLR2014.large, small.comp.median.MLR2015.large, small.comp.median.MLR2016.large, small.comp.median.MLR2017.large), year = c(2011,2012,2013,2014,2015,2016,2017))
+
+small.company.large.market.MLR.table$year <- factor(small.company.large.market.MLR.table$year)
+```
+
+ARIMA large company ind market
+```{r}
+#mod = lm(MLR ~ year, data = large.company.ind.market.MLR.table)
+timeMLR = ts(large.company.ind.market.MLR.table$MLR, start = c(2011, 1), frequency = 1)
+#mod.AR1 = arima(timeMLR, order = c(1,0,0))
+#mod.AR1
+
+mod.ARIMA.large.ind = auto.arima(timeMLR, allowdrift = FALSE)
+mod.ARIMA.large.ind
+future = forecast(mod.ARIMA.large.ind, h = 4)
+future
+
+#forecast(mod.AR1)
+```
+
+ARIMA small company ind market
+```{r}
+#mod = lm(MLR ~ year, data = large.company.ind.market.MLR.table)
+timeMLR.small.comp.ind = ts(small.company.ind.market.MLR.table$MLR, start = c(2011, 1), frequency = 1)
+#mod.AR2 = arima(timeMLR, order = c(3,0,1))
+#mod.AR2
+new.mod = auto.arima(timeMLR.small.comp.ind, allowdrift = FALSE)
+new.mod
+future = forecast(new.mod, h = 10)
+future
+plot(future)
+
+```
+
+
+```{r}
+mod.ARIMA.small.ind = auto.arima(timeMLR.small.comp.ind, allowdrift = FALSE)
+mod.ARIMA.small.ind
+future = forecast(mod.ARIMA.small.ind, h = 4)
+future
+```
+
+ARIMA large company small market
+```{r}
+#mod = lm(MLR ~ year, data = large.company.ind.market.MLR.table)
+# timeMLR = ts(large.company.small.market.MLR.table$MLR, start = c(2011, 1), frequency = 1)
+# mod.AR1 = arima(timeMLR, order = c(0,0,0))
+# mod.AR1
+
+mod.ARIMA.large.small = auto.arima(timeMLR, allowdrift = FALSE)
+mod.ARIMA.large.small
+future = forecast(mod.ARIMA.large.small, h = 4)
+future
+
+```
+
+ARIMA small company small market
+```{r}
+#mod = lm(MLR ~ year, data = large.company.ind.market.MLR.table)
+timeMLR = ts(small.company.small.market.MLR.table$MLR, start = c(2011, 1), frequency = 1)
+#mod.AR1 = arima(timeMLR, order = c(1,0,0))
+#mod.AR1
+
+mod.ARIMA.small.small = auto.arima(timeMLR, allowdrift = FALSE)
+mod.ARIMA.small.small
+future = forecast(mod.ARIMA.small.small, h = 4)
+future
+
+```
+
+
+ARIMA large company large market
+```{r}
+#mod = lm(MLR ~ year, data = large.company.ind.market.MLR.table)
+timeMLR = ts(large.company.large.market.MLR.table$MLR, start = c(2011, 1), frequency = 1)
+#mod.AR1 = arima(timeMLR, order = c(1,0,0))
+#mod.AR1
+
+mod.ARIMA.large.large = auto.arima(timeMLR, allowdrift = FALSE)
+mod.ARIMA.large.large
+future = forecast(mod.ARIMA.large.large, h = 4)
+future
+
+```
+
+ARIMA small company large market
+```{r}
+#mod = lm(MLR ~ year, data = large.company.ind.market.MLR.table)
+timeMLR = ts(small.company.large.market.MLR.table$MLR, start = c(2011, 1), frequency = 1)
+#mod.AR1 = arima(timeMLR, order = c(1,0,0))
+#mod.AR1
+
+mod.ARIMA.small.large = auto.arima(timeMLR, allowdrift = FALSE)
+mod.ARIMA.small.large
+future = forecast(mod.ARIMA.small.large, h = 4)
+future
+
+```
+
+
+
+
+
+
+
+
+
+
